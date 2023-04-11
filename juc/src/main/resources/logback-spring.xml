@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <springProperty scope="context" name="logLevel" source="log.level"/>
+    <springProperty scope="context" name="logPath" source="log.path"/>
+    <springProperty scope="context" name="logConsoleWithJansi" source="log.console.withJansi"/>
+    <springProperty scope="context" name="logConsolePattern" source="log.console.pattern"/>
+    <springProperty scope="context" name="logConsoleCharset" source="log.console.charset"/>
+    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>false</withJansi>
+        <encoder>
+            <pattern>%d{"yyyy-MM-dd HH:mm:ss.SSS"} %-5level [%thread] [${springAppName},%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{X-B3-ParentSpanId:-},%X{X-Span-Export:-}] %logger : %msg%n</pattern>
+            <charset>GBK</charset>
+        </encoder>
+    </appender>
+    <appender name="fileAll" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/all.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/all.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{"yyyy-MM-dd HH:mm:ss.SSS"} %-5level [%thread] [${springAppName},%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{X-B3-ParentSpanId:-},%X{X-Span-Export:-}] %logger : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <appender name="fileError" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/error.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{"yyyy-MM-dd HH:mm:ss.SSS"} %-5level [%thread] [${springAppName},%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{X-B3-ParentSpanId:-},%X{X-Span-Export:-}] %logger : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="console" />
+        <appender-ref ref="fileAll" />
+        <appender-ref ref="fileError" />
+    </root>
+</configuration>
