@@ -13,6 +13,7 @@
         <module>designpatterns</module>
         <module>sourcecode</module>
         <module>arrow</module>
+        <module>netty</module>
     </modules>
 
     <properties>
