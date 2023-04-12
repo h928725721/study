@@ -1,4 +1,4 @@
-package com.candy.netty.bio.timeclient;
+package com.candy.netty.bio.sync.timeclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;

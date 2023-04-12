@@ -1,4 +1,4 @@
-package com.candy.netty.bio.timeserver;
+package com.candy.netty.bio.sync.timeserver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
