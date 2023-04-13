@@ -1,4 +1,4 @@
-package com.candy.netty.netty;
+package com.candy.netty.netty.exc.schema;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -7,6 +7,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 import lombok.SneakyThrows;
 
 public class TimeServer {
@@ -48,9 +50,22 @@ public class TimeServer {
 
     private static class ChildChannelHandler extends ChannelInitializer<SocketChannel> {
 
+        /**
+         * LineBasedFrameDecoder：依次遍历ByteBuf中的可读字节，半段是否有“\n”或者"\r\n"，如果有就以此位置为结束位置，从可读索引到结束位置区间的字节就组成了一行。
+         *                        以换行符为结束标志的编码器，支持携带结束符或不懈怠结束符两种解码方式，支持配置单行最大长度
+         *                        连续读取到最大长度仍然没有发现换行符，就会抛出异常并忽略异常码流
+         *
+         * StringDecoder： 将接收到的对象转换成字符串，然后调用后面的Handler.
+         *
+         *
+         * LineBasedFrameDecoder + StringDecoder 组合就是按行切换的文本解码器
+         */
         @Override
-        protected void initChannel(SocketChannel socketChannel) throws Exception {
-            socketChannel.pipeline().addLast(new TimeServerHandler());
+        protected void initChannel(SocketChannel arg0) throws Exception {
+            arg0.pipeline().addLast(new LineBasedFrameDecoder(1024));
+            arg0.pipeline().addLast(new StringDecoder());
+            arg0.pipeline().addLast(new TimeServerHandler());
+
         }
     }
 
