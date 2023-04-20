@@ -1,52 +1,53 @@
 package com.candy.netty.netty.codingframe.messagepack;
 
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
+import org.msgpack.MessagePack;
+import org.msgpack.type.Value;
+import org.msgpack.type.ValueFactory;
+
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.nio.charset.StandardCharsets;
+public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 
-public class EchoClientHandler extends ChannelHandlerAdapter {
-    private final int sendNumber;
+    private final User user;
 
-    public EchoClientHandler(int sendNumber) {
-        this.sendNumber = sendNumber;
+    public EchoClientHandler() {
+        user = new User("John Doe", 25);
     }
 
-
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        UserInfo[] infos = userInfo();
-        for (UserInfo infoE : infos) {
-            ctx.write(infoE);
+    public void channelActive(ChannelHandlerContext ctx) {
+        MessagePack msgpack = new MessagePack();
+        byte[] bytes = null;
+        try {
+            bytes = msgpack.write(user);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        ctx.flush();
+        ByteBuf buffer = ctx.alloc().buffer();
+        buffer.writeBytes(bytes);
+        ctx.writeAndFlush(buffer);
     }
-    private UserInfo[] userInfo() {
-        UserInfo[] userInfos = new UserInfo[sendNumber];
-        UserInfo userInfo = null;
-        for (int i = 0; i < sendNumber; i++) {
-            userInfo = new UserInfo();
-            userInfo.setAge(i);
-            userInfo.setUserName("ABCDEFG ---------> " + i);
-            userInfos[i] = userInfo;
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        ByteBuf buf = (ByteBuf) msg;
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        MessagePack msgpack = new MessagePack();
+        try {
+            Value value = msgpack.read(bytes);
+            User user = new User(value.asMapValue().get(ValueFactory.createRawValue("name")).asRawValue().getString(),
+                    value.asMapValue().get(ValueFactory.createRawValue("age")).asIntegerValue().getInt());
+            System.out.println("Server received: " + user);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return userInfos;
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("Client receive the msgpack message : " + msg);
-        ctx.write(msg);
-    }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         ctx.close();
     }

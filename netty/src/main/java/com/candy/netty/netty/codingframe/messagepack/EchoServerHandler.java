@@ -1,44 +1,35 @@
 package com.candy.netty.netty.codingframe.messagepack;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerAdapter;
+import org.msgpack.MessagePack;
+
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
-@ChannelHandler.Sharable
-public class EchoServerHandler extends ChannelHandlerAdapter {
-    private final int sendNumber;
+public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
-    public EchoServerHandler(int sendNumber) {
-        this.sendNumber = sendNumber;
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        ByteBuf buf = (ByteBuf) msg;
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        MessagePack msgpack = new MessagePack();
+        try {
+            User user = msgpack.read(bytes, User.class);
+            System.out.println("Server received: " + user);
+            ctx.write(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("Client receive the msgpack message : " + msg);
-
-        UserInfo[] infos = userInfo();
-        for (UserInfo infoE : infos) {
-            ctx.write(infoE);
-        }
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
-    private UserInfo[] userInfo() {
-        UserInfo[] userInfos = new UserInfo[sendNumber];
-        UserInfo userInfo = null;
-        for (int i = 0; i < sendNumber; i++) {
-            userInfo = new UserInfo();
-            userInfo.setAge(i);
-            userInfo.setUserName("ABCDEFG ---------> " + i);
-            userInfos[i] = userInfo;
-        }
-        return userInfos;
-    }
 
-    /**
-     * 异常关闭链路
-     */
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         ctx.close();
     }
