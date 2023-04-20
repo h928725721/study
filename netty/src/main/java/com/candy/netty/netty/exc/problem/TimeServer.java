@@ -9,6 +9,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.SneakyThrows;
 
+/**
+ * TCP粘包、拆包问题导致的半包读写问题
+ */
 public class TimeServer {
 
     public static void main(String[] args) {

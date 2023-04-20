@@ -1,4 +1,4 @@
-package com.candy.netty.netty.exc.schema;
+package com.candy.netty.netty.exc.schema.linebase;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

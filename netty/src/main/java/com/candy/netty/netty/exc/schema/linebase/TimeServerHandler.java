@@ -1,4 +1,4 @@
-package com.candy.netty.netty.exc.schema;
+package com.candy.netty.netty.exc.schema.linebase;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

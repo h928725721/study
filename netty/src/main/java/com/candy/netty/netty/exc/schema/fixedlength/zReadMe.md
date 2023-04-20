@@ -1,0 +1,6 @@
+FixedLengthFrameDecoder，固定长度解码器，按照指定长度对消息进行自动解码
+
+
+通过telnet测试
+cmd后输入telnet localhost 8080
+cmd控制台输入超过20个字符后会打印到服务端
