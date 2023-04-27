@@ -1,46 +1,32 @@
 package com.candy.netty.netty.codingframe.messagepack;
 
-import org.msgpack.MessagePack;
-import org.msgpack.type.Value;
-import org.msgpack.type.ValueFactory;
-
-import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.SneakyThrows;
 
-public class EchoClientHandler extends ChannelInboundHandlerAdapter {
+public class EchoClientHandler extends ChannelHandlerAdapter {
 
-    private final User user;
+    private final int sendNumber;
 
-    public EchoClientHandler() {
-        user = new User("John Doe", 25);
+    public EchoClientHandler(int sendNumber) {
+        this.sendNumber = sendNumber;
     }
 
+    @SneakyThrows
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        MessagePack msgpack = new MessagePack();
-        byte[] bytes = null;
-        try {
-            bytes = msgpack.write(user);
-        } catch (Exception e) {
-            e.printStackTrace();
+        for (int i = 0; i < sendNumber; i++) {
+            User user = new User("John Doe" + i, i);
+            ctx.write(user);
         }
-        ByteBuf buffer = ctx.alloc().buffer();
-        buffer.writeBytes(bytes);
-        ctx.writeAndFlush(buffer);
+        ctx.flush();
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ByteBuf buf = (ByteBuf) msg;
-        byte[] bytes = new byte[buf.readableBytes()];
-        buf.readBytes(bytes);
-        MessagePack msgpack = new MessagePack();
         try {
-            Value value = msgpack.read(bytes);
-            User user = new User(value.asMapValue().get(ValueFactory.createRawValue("name")).asRawValue().getString(),
-                    value.asMapValue().get(ValueFactory.createRawValue("age")).asIntegerValue().getInt());
-            System.out.println("Server received: " + user);
+            System.out.println("Server received: " + msg);
+            ctx.write(msg);
         } catch (Exception e) {
             e.printStackTrace();
         }

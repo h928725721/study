@@ -1,17 +1,21 @@
-package com.candy.netty.netty.codingframe.messagepack;
+package com.candy.netty.netty.codingframe.protobuf;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
-public class EchoServer {
+public class SubReqServer {
 
     public static void main(String[] args) throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -20,15 +24,17 @@ public class EchoServer {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG,100)
+                    .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline p = ch.pipeline();
-                            p.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(65535,0,2,0,2));
-                            p.addLast("msgpack decoder",new MsgpackDecoder());
-                            p.addLast("frameEncoder",new LengthFieldPrepender(2));
-                            p.addLast("msgpack encoder",new MsgpackEncoder());
-                            p.addLast(new EchoServerHandler(1000));
+                            //主要用于半包处理
+                           ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
+                           ch.pipeline().addLast(new ProtobufDecoder(SubscribeReqProto.SubscribeReq.getDefaultInstance()));
+                           ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
+                           ch.pipeline().addLast(new ProtobufEncoder());
+                           ch.pipeline().addLast(new SubReqServerHandler());
                         }
                     });
 
