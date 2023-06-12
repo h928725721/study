@@ -50,7 +50,6 @@ public class PutTakeTest {
         }
     }
     class Producer implements Runnable {
-        ConcurrentHashMap
         @Override
         public void run() {
 
