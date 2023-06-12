@@ -13,8 +13,8 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static io.netty.handler.codec.http.HttpHeaderUtil.isKeepAlive;
-import static io.netty.handler.codec.http.HttpHeaderUtil.setContentLength;
+import static io.netty.handler.codec.http.HttpHeaders.isKeepAlive;
+import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     private static final Logger LOGGER = Logger.getLogger(WebSocketServerHandler.class.getName());
@@ -39,7 +39,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
         //如果HTTP解码失败，返回HTTP异常
-        if (!req.decoderResult().isSuccess() || (!"websocket".equals(req.headers().get("Upgrade")))) {
+        if (!req.getDecoderResult().isSuccess() || (!"websocket".equals(req.headers().get("Upgrade")))) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
             return;
         }
@@ -47,7 +47,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory("ws://localhost:8080/websocket", null, false);
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
-            WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
+            WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), req);
         }
@@ -55,8 +55,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     private void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
         //返回应答给客户端
-        if (res.status().code() != 200) {
-            ByteBuf buf = Unpooled.copiedBuffer(res.status().toString().getBytes());
+        if (res.getStatus().code() != 200) {
+            ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString().getBytes());
             res.content().writeBytes(buf);
             buf.release();
             setContentLength(res,res.content().readableBytes());
@@ -64,7 +64,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
         //如果是非Keep-Alive ，关闭链接
         ChannelFuture f = ctx.channel().writeAndFlush(res);
-        if (! isKeepAlive(req) || res.status().code() != 200) {
+        if (! isKeepAlive(req) || res.getStatus().code() != 200) {
             f.addListener(ChannelFutureListener.CLOSE);
         }
     }

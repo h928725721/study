@@ -1,6 +1,7 @@
 package com.candu.concurrency.part1.safe;
 
 import java.rmi.UnexpectedException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,6 +50,7 @@ public class PutTakeTest {
         }
     }
     class Producer implements Runnable {
+        ConcurrentHashMap
         @Override
         public void run() {
 

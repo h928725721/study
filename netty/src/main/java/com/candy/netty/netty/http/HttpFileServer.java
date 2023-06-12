@@ -12,6 +12,9 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
+import java.util.Collections;
+import java.util.HashSet;
+
 public class HttpFileServer {
 
     private static final String DEFAULT_URL = "/netty/src/main/java/com/candy/netty";
@@ -63,6 +66,4 @@ public class HttpFileServer {
             workerGroup.shutdownGracefully();
         }
     }
-
-
 }

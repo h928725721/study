@@ -26,6 +26,7 @@ public class EchoServer {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup,workerGroup)
                 .channel(NioServerSocketChannel.class)
+                //backlog 指定了内核为此套接口排队的最大连接数，对于给定的监听套接口，内核需要维护两个队列：未连接队列喝已连接队列
                 .option(ChannelOption.SO_BACKLOG,100)
                 .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
