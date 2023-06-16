@@ -12,21 +12,21 @@ public class LoginAuthRespHandler extends ChannelHandlerAdapter {
     /**
      * 重复登录保护
      */
-    private Map<String, Boolean> nodeCheck = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> nodeCheck = new ConcurrentHashMap<>();
 
     /**
      * IP认证和白名单列表
      */
-    private String[] whiteList = {"127.0.0.1", "192.168.1.104"};
+    private final String[] whiteList = {"127.0.0.1", "192.168.1.104"};
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NettyMessage message = (NettyMessage) msg;
-
+        //如果是握手请求消息，处理，其他消息透传
         if (message.getHeader() != null && message.getHeader().getType() == MessageType.LOGIN_REQ.value()) {
             String nodeIndex = ctx.channel().remoteAddress().toString();
             NettyMessage loginResp = null;
-
+            // 重复登录，拒绝
             if (nodeCheck.containsKey(nodeIndex)) {
                 loginResp = buildResponse((byte) -1);
             } else {

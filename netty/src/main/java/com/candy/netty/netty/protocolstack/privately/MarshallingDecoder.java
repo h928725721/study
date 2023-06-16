@@ -1,8 +1,8 @@
 package com.candy.netty.netty.protocolstack.privately;
 
-import com.candy.netty.netty.codingframe.marshalling.MarshallingCodeCFactory;
+import com.candy.netty.netty.codingframe.marshalling.MarshallingCodecFcactory;
 import io.netty.buffer.ByteBuf;
-import org.jboss.marshalling.ByteBufferInput;
+import org.jboss.marshalling.ByteInput;
 import org.jboss.marshalling.Unmarshaller;
 
 import java.io.IOException;
@@ -11,14 +11,15 @@ public class MarshallingDecoder {
     private final Unmarshaller unmarshaller;
 
     public MarshallingDecoder() throws IOException {
-        unmarshaller = MarshallingCodeCFactory.buildUnMarshalling();
+        unmarshaller = MarshallingCodecFcactory.buildUnMarshalling();
     }
 
-    protected Object decode(ByteBuf in) throws Exception  {
+    public Object decode(ByteBuf in) throws Exception  {
         int objectSize = in.readInt();
         ByteBuf buf = in.slice(in.readerIndex(), objectSize);
+        ByteInput input = new ChannelBufferByteInput(buf);
         try {
-            unmarshaller.start(new ByteBufferInput(buf.nioBuffer()));
+            unmarshaller.start(input);
             Object obj = unmarshaller.readObject();
             unmarshaller.finish();
             in.readerIndex(in.readerIndex() + objectSize);

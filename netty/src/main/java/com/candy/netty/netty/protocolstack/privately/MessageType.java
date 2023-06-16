@@ -1,8 +1,5 @@
 package com.candy.netty.netty.protocolstack.privately;
 
-import lombok.Getter;
-import lombok.Setter;
-
 public enum MessageType {
 
     LOGIN_REQ(3),
@@ -13,7 +10,7 @@ public enum MessageType {
     ;
 
 
-    int value;
+    final int value;
 
     MessageType(int i) {
         this.value = i;

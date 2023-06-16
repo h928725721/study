@@ -23,16 +23,14 @@ public final class NettyMessageEncoder extends MessageToMessageEncoder<NettyMess
 
     @Override
     protected void encode(ChannelHandlerContext ctx, NettyMessage msg, List<Object> out) throws Exception {
-        if (msg == null || msg.getHeader() == null) {
-            throw new Exception("The encode message is null");
-        }
+        if (msg == null || msg.getHeader() == null) throw new Exception("The encode message is null");
         ByteBuf sendBuf = Unpooled.buffer();
-        sendBuf.writeInt(msg.getHeader().getCrcCode());
-        sendBuf.writeInt(msg.getHeader().getLength());
-        sendBuf.writeLong(msg.getHeader().getSessionID());
-        sendBuf.writeByte(msg.getHeader().getType());
-        sendBuf.writeByte(msg.getHeader().getPriority());
-        sendBuf.writeInt(msg.getHeader().getAttachment().size());
+        sendBuf.writeInt((msg.getHeader().getCrcCode()));
+        sendBuf.writeInt((msg.getHeader().getLength()));
+        sendBuf.writeLong((msg.getHeader().getSessionID()));
+        sendBuf.writeByte((msg.getHeader().getType()));
+        sendBuf.writeByte((msg.getHeader().getPriority()));
+        sendBuf.writeInt((msg.getHeader().getAttachment().size()));
         String key = null;
         byte[] keyArray = null;
         Object value = null;

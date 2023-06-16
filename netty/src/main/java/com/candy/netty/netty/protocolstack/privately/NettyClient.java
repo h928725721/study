@@ -35,12 +35,14 @@ public class NettyClient {
 
                         }
                     });
+            //发起异步连接操作
             ChannelFuture future = b.connect(
                     new InetSocketAddress(host, port),
                     new InetSocketAddress(NettyConstant.LOCALIP, NettyConstant.LOCAL_PORT)
             ).sync();
             future.channel().closeFuture().sync();
         } finally {
+            // 所有资源释放完成之后，清空资源，再次发起重连操作
             excutor.execute(() -> {
                 try {
                     TimeUnit.SECONDS.sleep(5);

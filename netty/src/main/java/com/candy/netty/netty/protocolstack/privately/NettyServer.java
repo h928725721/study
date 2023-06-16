@@ -23,7 +23,9 @@ public class NettyServer {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline().addLast(new NettyMessageDecoder(1024 * 1024, 4, 4));
+                        ch.pipeline().addLast(new NettyMessageEncoder());
                         ch.pipeline().addLast("readTimeoutHandler", new ReadTimeoutHandler(50));
+                        ch.pipeline().addLast(new LoginAuthRespHandler());
                         ch.pipeline().addLast("HeartBeatHandler", new HeartBeatRespHandler());
 
                     }
