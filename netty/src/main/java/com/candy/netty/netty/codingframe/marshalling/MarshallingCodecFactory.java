@@ -8,7 +8,7 @@ import org.jboss.marshalling.*;
 
 import java.io.IOException;
 
-public final class MarshallingCodecFcactory {
+public final class MarshallingCodecFactory {
 
     public static MarshallingDecoder buildMarshallingDecoder() {
         //serial 创建的是java序列化工厂对象

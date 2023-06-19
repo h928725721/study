@@ -1,31 +1,54 @@
 package com.candy.netty.netty.protocolstack.privately;
 
-import com.candy.netty.netty.codingframe.marshalling.MarshallingCodecFcactory;
+import com.candy.netty.netty.codingframe.marshalling.MarshallingCodecFactory;
 import io.netty.buffer.ByteBuf;
-import org.jboss.marshalling.ByteInput;
 import org.jboss.marshalling.Unmarshaller;
 
 import java.io.IOException;
 
 public class MarshallingDecoder {
-    private final Unmarshaller unmarshaller;
 
+    /**
+     * 构建一个解码器
+     */
+    private final Unmarshaller provider;
+
+    /**
+     * Marshalling decoder
+     *
+     * @throws IOException io exception
+     * @since 1.0
+     */
     public MarshallingDecoder() throws IOException {
-        unmarshaller = MarshallingCodecFcactory.buildUnMarshalling();
+        this.provider = MarshallingCodecFactory.buildUnMarshalling();
     }
 
-    public Object decode(ByteBuf in) throws Exception  {
-        int objectSize = in.readInt();
-        ByteBuf buf = in.slice(in.readerIndex(), objectSize);
-        ByteInput input = new ChannelBufferByteInput(buf);
+    /**
+     * 执行数据解码
+     *
+     * @param byteBuf byte buf
+     * @return object object
+     * @throws IOException io exception
+     * @since 1.0
+     */
+    public Object decode(ByteBuf byteBuf) throws IOException {
+        //先读取对象的长度
+        int objSize = byteBuf.readInt();
+        //创建一个新的buf进行读取
+        ByteBuf objBuf = byteBuf.slice(byteBuf.readerIndex(), objSize);
+        ChannelBufferByteInput channelBufferByteInput = new ChannelBufferByteInput(objBuf);
+        Object object = null;
         try {
-            unmarshaller.start(input);
-            Object obj = unmarshaller.readObject();
-            unmarshaller.finish();
-            in.readerIndex(in.readerIndex() + objectSize);
-            return obj;
+            provider.start(channelBufferByteInput);
+            object = provider.readObject();
+            provider.finish();
+            //将读的索引位置设置到当前读的索引位置+上对象长度的位置
+            byteBuf.readerIndex(byteBuf.readerIndex() + objSize);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         } finally {
-            unmarshaller.close();
+            provider.close();
         }
+        return object;
     }
 }

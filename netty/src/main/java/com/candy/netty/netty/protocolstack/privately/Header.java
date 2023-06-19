@@ -1,6 +1,6 @@
 package com.candy.netty.netty.protocolstack.privately;
 
-import io.netty.buffer.ByteBuf;
+import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
@@ -12,6 +12,7 @@ import java.util.Map;
  */
 @Data
 @ToString
+@Builder
 public final class Header {
     private int crcCode = 0xabef0101;
 
